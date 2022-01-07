@@ -12,4 +12,12 @@
 ![](https://i.imgur.com/GBchJpS.png)
 ![](https://i.imgur.com/KlMxgvc.png)
 
+7. Fix resources not loading when running via the run configs:
+
+![](https://i.imgur.com/sdZNnH8.png)
+
+- Change Gradle => IntelliJ IDEA
+
+![](https://i.imgur.com/7osMDhu.png)
+
 *A checkstyle is coming soon, meaning Cleanroom's projects will use a specific coding style that has to be abided at time of PR/building.*
