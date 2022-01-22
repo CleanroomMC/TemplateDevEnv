@@ -2,14 +2,14 @@ buildscript {
     repositories {
         jcenter()
         maven { 
-			url = 'https://files.minecraftforge.net/maven' 
+			url = 'https://maven.cleanroommc.com' 
 		}
 		maven { 
 			url = 'https://repo.spongepowered.org/maven' 
 		}
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3.4'
 		if (project.use_mixins) {
 			classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
 		}
@@ -44,18 +44,18 @@ minecraft {
 }
 
 repositories {
-	maven {
-		url 'https://jitpack.io'
+	maven { 
+		url = 'https://maven.cleanroommc.com' 
 	}
     maven {
-        url 'https://repo.spongepowered.org/maven'
+        url = 'https://repo.spongepowered.org/maven'
     }
 }
 
 dependencies {
 
 	if (project.use_assetmover) {
-		deobfCompile ('com.github.CleanroomMC:AssetMover:0.2')
+		deobfCompile 'com.cleanroommc:assetmover:0.2'
 	}
 	if (project.use_mixins) {
 		embed ('org.spongepowered:mixin:0.8.3') {
