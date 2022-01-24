@@ -9,7 +9,7 @@ buildscript {
 		}
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3.4'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
 		if (project.use_mixins) {
 			classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
 		}
