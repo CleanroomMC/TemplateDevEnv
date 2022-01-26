@@ -1,6 +1,5 @@
 buildscript {
     repositories {
-        jcenter()
         maven { 
 			url = 'https://maven.cleanroommc.com' 
 		}
@@ -41,6 +40,17 @@ minecraft {
     version = '1.12.2-14.23.5.2847'
     runDir = 'run'
     mappings = 'stable_39'
+	def args = []
+	if (project.use_coremod) {
+		args << '-Dfml.coreMods.load=' + coremod_plugin_class_name
+	}
+	if (project.use_mixins) {
+		args << '-Dmixin.hotSwap=true'
+		args << '-Dmixin.checks.interfaces=true'
+		args << '-Dmixin.debug.export=true'
+	}
+	clientJvmArgs.addAll(args)
+	serverJvmArgs.addAll(args)
 }
 
 repositories {
