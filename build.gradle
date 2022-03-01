@@ -79,6 +79,10 @@ dependencies {
 		}
 		annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
     }
+	if (project.mixin_into_mods) {
+		deobfCompile 'zone.rong:mixinbooter:4.1'
+	}
+	
 }
 
 sourceSets {
