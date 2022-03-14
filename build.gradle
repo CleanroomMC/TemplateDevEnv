@@ -68,20 +68,8 @@ dependencies {
 		deobfCompile 'com.cleanroommc:assetmover:0.2'
 	}
 	if (project.use_mixins) {
-		embed ('org.spongepowered:mixin:0.8.3') {
-			exclude module: 'asm-commons'
-			exclude module: 'asm-tree'
-			exclude module: 'launchwrapper'
-			exclude module: 'guava'
-			exclude module: 'log4j-core'
-			exclude module: 'gson'
-			exclude module: 'commons-io'
-		}
-		annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
+		deobfCompile 'zone.rong:mixinbooter:4.2'
     }
-	if (project.mixin_into_mods) {
-		deobfCompile 'zone.rong:mixinbooter:4.1'
-	}
 	
 }
 
@@ -121,9 +109,4 @@ jar {
 		}
         attributes(attribute_map)
     }
-	if (project.use_mixins && project.pack_mixins_in_jar) {
-		from (configurations.embed.collect { it.isDirectory() ? it : zipTree(it) }) {
-			exclude 'LICENSE.txt', 'module-info.class', 'META-INF/*'
-		}
-	}  
 }
