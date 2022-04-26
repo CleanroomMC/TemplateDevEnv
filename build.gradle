@@ -9,7 +9,7 @@ buildscript {
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-		if (project.use_mixins) {
+		if (project.use_mixins.toBoolean()) {
 			classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
 		}
     }
@@ -17,7 +17,7 @@ buildscript {
 
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-if (project.use_mixins) {
+if (project.use_mixins.toBoolean()) {
 	apply plugin: 'org.spongepowered.mixin'
 }
 
@@ -41,10 +41,10 @@ minecraft {
     runDir = 'run'
     mappings = 'stable_39'
 	def args = []
-	if (project.use_coremod) {
+	if (project.use_coremod.toBoolean()) {
 		args << '-Dfml.coreMods.load=' + coremod_plugin_class_name
 	}
-	if (project.use_mixins) {
+	if (project.use_mixins.toBoolean()) {
 		args << '-Dmixin.hotSwap=true'
 		args << '-Dmixin.checks.interfaces=true'
 		args << '-Dmixin.debug.export=true'
@@ -64,10 +64,10 @@ repositories {
 
 dependencies {
 
-	if (project.use_assetmover) {
+	if (project.use_assetmover.toBoolean()) {
 		deobfCompile 'com.cleanroommc:assetmover:0.2'
 	}
-	if (project.use_mixins) {
+	if (project.use_mixins.toBoolean()) {
 		deobfCompile 'zone.rong:mixinbooter:4.2'
     }
 	
@@ -101,10 +101,10 @@ processResources {
 jar {
     manifest {
 		def attribute_map = [:]
-		if (project.use_coremod) {
+		if (project.use_coremod.toBoolean()) {
 			attribute_map['FMLCorePlugin'] = project.coremod_plugin_class_name
 		}
-		if (project.use_mixins) {
+		if (project.use_mixins.toBoolean()) {
 			attribute_map['TweakClass'] = 'org.spongepowered.asm.launch.MixinTweaker'
 		}
         attributes(attribute_map)
