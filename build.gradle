@@ -68,7 +68,7 @@ dependencies {
 		deobfCompile 'com.cleanroommc:assetmover:0.2'
 	}
 	if (project.use_mixins.toBoolean()) {
-		deobfCompile 'zone.rong:mixinbooter:4.2'
+		deobfCompile 'zone.rong:mixinbooter:5.0'
     }
 	
 }
