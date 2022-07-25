@@ -1,14 +1,15 @@
 buildscript {
     repositories {
         maven { 
-			url = 'https://maven.cleanroommc.com' 
+			// url = 'https://maven.cleanroommc.com'
+			url = 'https://maven.minecraftforge.net'
 		}
 		maven { 
 			url = 'https://repo.spongepowered.org/maven' 
 		}
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3.4'
 		if (project.use_mixins.toBoolean()) {
 			classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
 		}
