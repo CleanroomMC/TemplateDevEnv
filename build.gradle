@@ -33,6 +33,39 @@ archivesBaseName = project.archives_base_name
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
+
+if (project.use_lntellij_idea.toBoolean()) {
+	apply {
+        plugin 'java'
+        plugin 'idea'
+    }
+
+
+    idea {
+        module {
+            downloadJavadoc = true
+            downloadSources = true
+        }
+    }
+}
+
+
+if (project.use_eclipse.toBoolean()) {
+	apply {
+        plugin 'java'
+        plugin 'eclipse'
+    }
+
+
+    eclipse {
+        module {
+            downloadJavadoc = true
+            downloadSources = true
+        }
+    }
+}
+
+
 minecraft {
 
     mappings channel: 'stable', version: '39-1.12'
