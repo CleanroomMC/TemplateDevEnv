@@ -1,10 +1,6 @@
 buildscript {
     repositories {
         maven {
-			name 'ForgeGradle 5'
-			url 'https://maven.minecraftforge.net' 
-		}
-        maven {
 			name 'MixinGradle'
 			url 'https://repo.spongepowered.org/repository/maven-public'
 		}
@@ -18,10 +14,10 @@ buildscript {
 }
 
 plugins {
-    id 'wtf.gofancy.fancygradle' version '1.+'
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'wtf.gofancy.fancygradle' version '1.1.+'
 }
 
-apply plugin: 'net.minecraftforge.gradle'
 // apply plugin: 'maven-publish'
 if (project.use_mixins.toBoolean()) {
 	apply plugin: 'org.spongepowered.mixin'
