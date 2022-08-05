@@ -45,7 +45,6 @@ if (project.use_lntellij_idea.toBoolean()) {
     }
 }
 
-
 if (project.use_eclipse.toBoolean()) {
 	apply {
         plugin 'java'
@@ -83,6 +82,12 @@ minecraft {
 			}
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+            environment 'MC_VERSION', '1.12.2'
+            mods {
+                '${archives_base_name}' {
+                    source sourceSets.main
+                }
+            }
         }
 
         server {
@@ -96,6 +101,7 @@ minecraft {
 			}
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+            environment 'MC_VERSION', '1.12.2'
             mods {
                 '${archives_base_name}' {
                     source sourceSets.main
@@ -105,9 +111,6 @@ minecraft {
     }
 }
 
-sourceSets.main.resources {
-	srcDir 'src/generated/resources'
-}
 
 repositories {
 	maven { 
@@ -120,8 +123,12 @@ repositories {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
-    compileOnly fg.deobf('zone.rong:mixinbooter:5.0')
-    runtimeOnly 'zone.rong:mixinbooter:5.0'
+
+
+    if (project.use_mixins.toBoolean()) {
+        compileOnly fg.deobf('zone.rong:mixinbooter:5.0')
+        runtimeOnly 'zone.rong:mixinbooter:5.0'
+    }
 }
 
 fancyGradle {
