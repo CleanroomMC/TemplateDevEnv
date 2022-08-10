@@ -14,6 +14,10 @@ Information about the [GITHUB_TOKEN](https://docs.github.com/en/actions/security
 
 For the `Release to GitHub` workflow to work you repo needs to be public
 
+You can add the template as a remote in git and pull changes from it
+
+For the workflows to be detected they must be on the main branch
+
 ## Credits:
 
 The workflows are taken from the [BQ-u repo](https://github.com/CleanroomMC/BetterQuesting)
