@@ -24,7 +24,7 @@ if (project.use_mixins.toBoolean()) {
 
 version = project.mod_version
 group = project.maven_group
-archivesBaseName = project.archives_base_name + '-1.12.2'
+archivesBaseName = project.archives_base_name
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 

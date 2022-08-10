@@ -17,7 +17,7 @@ jobs:
 
       - name: Get Mod Version
         id: get_version
-        run: echo ::set-output name=version::$(sed -n 's/^modVersion = \(.*\)/\1/p' < gradle.properties*)
+        run: echo ::set-output name=version::$(sed -n 's/^mod_version = \(.*\)/\1/p' < gradle.properties*)
 
       - name: Get Previous tag
         id: previous_tag
