@@ -1,3 +1,9 @@
+## Releasing to Github:
+
+This workflow will make a release and tag based on the version of your mod (`mod_version` variable). 
+It is also checking if you have incremented the version based on the latest release, but this is also introducing a unique issue.
+If you don't have a release it will fail, so a workaround is to create a dummy release based on the initial commit and delete it afterwards
+
 ## Releasing to CurseForge:
 For the `Release to CurseForge` workflow to work you will need to set up [github secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository)
 
