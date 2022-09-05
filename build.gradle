@@ -1,25 +1,25 @@
 buildscript {
     repositories {
         maven { 
-			// url = 'https://maven.cleanroommc.com'
-			url = 'https://maven.minecraftforge.net'
-		}
-		maven { 
-			url = 'https://repo.spongepowered.org/maven' 
-		}
+            // url = 'https://maven.cleanroommc.com'
+            url = 'https://maven.minecraftforge.net'
+        }
+        maven { 
+            url = 'https://repo.spongepowered.org/maven' 
+        }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3.4'
-		if (project.use_mixins.toBoolean()) {
-			classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
-		}
+        if (project.use_mixins.toBoolean()) {
+            classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
+        }
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
 
 if (project.use_mixins.toBoolean()) {
-	apply plugin: 'org.spongepowered.mixin'
+    apply plugin: 'org.spongepowered.mixin'
 }
 
 version = project.mod_version
@@ -41,23 +41,23 @@ minecraft {
     version = '1.12.2-14.23.5.2847'
     runDir = 'run'
     mappings = 'stable_39'
-	def args = []
-	if (project.use_coremod.toBoolean()) {
-		args << '-Dfml.coreMods.load=' + coremod_plugin_class_name
-	}
-	if (project.use_mixins.toBoolean()) {
-		args << '-Dmixin.hotSwap=true'
-		args << '-Dmixin.checks.interfaces=true'
-		args << '-Dmixin.debug.export=true'
-	}
-	clientJvmArgs.addAll(args)
-	serverJvmArgs.addAll(args)
+    def args = []
+    if (project.use_coremod.toBoolean()) {
+        args << '-Dfml.coreMods.load=' + coremod_plugin_class_name
+    }
+    if (project.use_mixins.toBoolean()) {
+        args << '-Dmixin.hotSwap=true'
+        args << '-Dmixin.checks.interfaces=true'
+        args << '-Dmixin.debug.export=true'
+    }
+    clientJvmArgs.addAll(args)
+    serverJvmArgs.addAll(args)
 }
 
 repositories {
-	maven { 
-		url = 'https://maven.cleanroommc.com' 
-	}
+    maven { 
+        url = 'https://maven.cleanroommc.com' 
+    }
     maven {
         url = 'https://repo.spongepowered.org/maven'
     }
@@ -65,13 +65,13 @@ repositories {
 
 dependencies {
 
-	if (project.use_assetmover.toBoolean()) {
-		deobfCompile 'com.cleanroommc:assetmover:0.2'
-	}
-	if (project.use_mixins.toBoolean()) {
-		deobfCompile 'zone.rong:mixinbooter:5.0'
+    if (project.use_assetmover.toBoolean()) {
+        deobfCompile 'com.cleanroommc:assetmover:0.2'
     }
-	
+    if (project.use_mixins.toBoolean()) {
+        deobfCompile 'zone.rong:mixinbooter:5.0'
+    }
+    
 }
 
 sourceSets {
@@ -96,22 +96,28 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
-	rename '(.+_at.cfg)', 'META-INF/$1' // Access Transformers
+    
+    if (project.use_access_transformer.toBoolean()) {
+        rename '(.+_at.cfg)', 'META-INF/$1' // Access Transformers
+    }
 }
 
 jar {
     manifest {
-		def attribute_map = [:]
-		if (project.use_coremod.toBoolean()) {
-			attribute_map['FMLCorePlugin'] = project.coremod_plugin_class_name
-			if (project.include_mod.toBoolean()) {
-				attribute_map['FMLCorePluginContainsFMLMod'] = true
-				attribute_map['ForceLoadAsMod'] = project.gradle.startParameter.taskNames[0] == "build"
-			}
-		}
-		if (project.use_mixins.toBoolean()) {
-			attribute_map['TweakClass'] = 'org.spongepowered.asm.launch.MixinTweaker'
-		}
+        def attribute_map = [:]
+        if (project.use_coremod.toBoolean()) {
+            attribute_map['FMLCorePlugin'] = project.coremod_plugin_class_name
+            if (project.include_mod.toBoolean()) {
+                attribute_map['FMLCorePluginContainsFMLMod'] = true
+                attribute_map['ForceLoadAsMod'] = project.gradle.startParameter.taskNames[0] == "build"
+            }
+        }
+        if (project.use_mixins.toBoolean()) {
+            attribute_map['TweakClass'] = 'org.spongepowered.asm.launch.MixinTweaker'
+        }
+		if (project.use_access_transformer.toBoolean()) {
+            attribute_map['FMLAT'] = project.archives_base_name + '_at.cfg'
+        }
         attributes(attribute_map)
     }
 }
