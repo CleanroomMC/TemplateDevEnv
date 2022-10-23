@@ -17,7 +17,7 @@ plugins {
     id 'wtf.gofancy.fancygradle' version '1.1.+'
 }
 
-// apply plugin: 'maven-publish'
+// apply plugin: 'org.spongepowered.mixin'
 if (project.use_mixins.toBoolean()) {
 	apply plugin: 'org.spongepowered.mixin'
 }
@@ -29,7 +29,7 @@ archivesBaseName = project.archives_base_name
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
 
-if (project.use_lntellij_idea.toBoolean()) {
+if (project.use_intellij_idea.toBoolean()) {
 	apply {
         plugin 'java'
         plugin 'idea'
@@ -70,7 +70,7 @@ minecraft {
 
     runs {
         client {
-            workingDirectory project.file('run/client')
+            workingDirectory project.file('run')
 			if (project.use_coremod.toBoolean()) {
 				jvmArg '-Dfml.coreMods.load=' + coremod_plugin_class_name
 			}
@@ -85,7 +85,7 @@ minecraft {
         }
 
         server {
-            workingDirectory project.file('run/server')
+            workingDirectory project.file('run')
             if (project.use_coremod.toBoolean()) {
 				jvmArg '-Dfml.coreMods.load=' + coremod_plugin_class_name
 			}
@@ -115,8 +115,10 @@ dependencies {
 
 
     if (project.use_mixins.toBoolean()) {
-        compileOnly fg.deobf('zone.rong:mixinbooter:5.0')
+        compileOnly 'zone.rong:mixinbooter:5.0'
         runtimeOnly 'zone.rong:mixinbooter:5.0'
+
+        annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
     }
 }
 
@@ -131,30 +133,29 @@ fancyGradle {
 if (project.build_deobfJar.toBoolean()) {
     // Create deobf dev jars
     task deobfJar(type: Jar) {
+        archiveClassifier.set("deobf")
         from sourceSets.main.output
-        classifier = 'deobf'
     }
 }
 
 if (project.build_apiJar.toBoolean()) {
     // Create API library jar
     task apiZip(type: Jar) {
+        archiveClassifier.set("api")
         from(sourceSets.main.java) {
             include "name/api/**"
         }
         from(sourceSets.main.output) {
             include "name/api/**"
         }
-
-        classifier = 'api'
     }
 }
 
 if (project.build_sourceJar.toBoolean()) {
     // Create source jar
     task sourcesJar(type: Jar) {
+        archiveClassifier.set("sources")
         from sourceSets.main.allJava
-        classifier = 'sources'
     }
 }
 
