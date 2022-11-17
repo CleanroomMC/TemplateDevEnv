@@ -115,8 +115,8 @@ dependencies {
 
 
     if (project.use_mixins.toBoolean()) {
-        compileOnly 'zone.rong:mixinbooter:5.0'
-        runtimeOnly 'zone.rong:mixinbooter:5.0'
+        compileOnly 'zone.rong:mixinbooter:7.0'
+        runtimeOnly 'zone.rong:mixinbooter:7.0'
 
         annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
     }
