@@ -112,9 +112,6 @@ jar {
                 attribute_map['ForceLoadAsMod'] = project.gradle.startParameter.taskNames[0] == "build"
             }
         }
-        if (project.use_mixins.toBoolean()) {
-            attribute_map['TweakClass'] = 'org.spongepowered.asm.launch.MixinTweaker'
-        }
 		if (project.use_access_transformer.toBoolean()) {
             attribute_map['FMLAT'] = project.archives_base_name + '_at.cfg'
         }
