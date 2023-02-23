@@ -32,9 +32,6 @@ modifiers.setInt(urlsMcpjson, urlsMcpjson.getModifiers() & ~Modifier.FINAL)
 urlAssetsField.set(null, "https://resources.download.minecraft.net")
 urlsMcpjson.get(null)[1] = "https://export.mcpbot.bspk.rs/versions.json"
 
-println Constants.URL_ASSETS
-println Constants.URLS_MCP_JSON
-
 apply plugin: 'net.minecraftforge.gradle.forge'
 
 if (project.use_mixins.toBoolean()) {
