@@ -16,6 +16,11 @@ buildscript {
     }
 }
 
+import net.minecraftforge.gradle.common.Constants
+
+import java.lang.reflect.Field
+import java.lang.reflect.Modifier
+
 // Fixing ForgeGradle 2.3 from within the buildscript, funny huh?
 // Throw this code before `apply plugin: 'net.minecraftforge.gradle.forge'`
 def urlAssetsField = Constants.class.getDeclaredField("URL_ASSETS")
