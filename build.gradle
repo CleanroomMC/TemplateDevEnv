@@ -16,6 +16,25 @@ buildscript {
     }
 }
 
+// Fixing ForgeGradle 2.3 from within the buildscript, funny huh?
+// Throw this code before `apply plugin: 'net.minecraftforge.gradle.forge'`
+def urlAssetsField = Constants.class.getDeclaredField("URL_ASSETS")
+def urlsMcpjson = Constants.class.getDeclaredField("URLS_MCP_JSON")
+def modifiers = Field.class.getDeclaredField("modifiers")
+
+urlAssetsField.setAccessible(true)
+urlsMcpjson.setAccessible(true)
+modifiers.setAccessible(true)
+
+modifiers.setInt(urlAssetsField, urlAssetsField.getModifiers() & ~Modifier.FINAL)
+modifiers.setInt(urlsMcpjson, urlsMcpjson.getModifiers() & ~Modifier.FINAL)
+
+urlAssetsField.set(null, "https://resources.download.minecraft.net")
+urlsMcpjson.get(null)[1] = "https://export.mcpbot.bspk.rs/versions.json"
+
+println Constants.URL_ASSETS
+println Constants.URLS_MCP_JSON
+
 apply plugin: 'net.minecraftforge.gradle.forge'
 
 if (project.use_mixins.toBoolean()) {
