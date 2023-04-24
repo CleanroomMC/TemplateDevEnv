@@ -27,6 +27,10 @@ java {
     withJavadocJar()
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+}
+
 configurations {
     embed
     implementation.extendsFrom(embed)
