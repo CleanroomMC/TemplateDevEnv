@@ -2,7 +2,7 @@
 
 Template workspace for modding Minecraft 1.12.2. Licensed under MIT, it is made for public use.
 
-This template currently utilizies **Gradle 4.10.3** + **ForgeGradle 2.3.4** + **Forge 14.23.5.2847**.
+This template currently utilizies **Gradle 4.10.3** + **[ForgeGradle 2.3-1.0.+ (Anatawa's Fork)](https://github.com/anatawa12/ForgeGradle-2.3/)** + **Forge 14.23.5.2847**.
 
 With **coremod and mixin support** that is easy to configure.
 
