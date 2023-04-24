@@ -112,6 +112,16 @@ if (project.use_mixins.toBoolean()) {
     }
 }
 
+if (project.use_access_transformer.toBoolean()) {
+    for (File at : sourceSets.getByName("main").resources.files) {
+        if (at.name.toLowerCase().endsWith("_at.cfg")) {
+            atsFound = true
+            tasks.deobfuscateMergedJarToSrg.accessTransformerFiles.from(at)
+            tasks.srgifyBinpatchedJar.accessTransformerFiles.from(at)
+        }
+    }
+}
+
 processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property 'version', project.version
