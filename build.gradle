@@ -69,7 +69,6 @@ repositories {
 }
 
 dependencies {
-
     if (project.use_assetmover.toBoolean()) {
         implementation 'com.cleanroommc:assetmover:2.0'
     }
@@ -161,6 +160,8 @@ jar {
         }
         attributes(attribute_map)
     }
+    // Add all embedded dependencies into the jar
+    from(provider{ configurations.embed.collect {it.isDirectory() ? it : zipTree(it)} })
 }
 
 idea {
