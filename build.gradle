@@ -132,7 +132,6 @@ processResources {
     inputs.property 'mcversion', project.minecraft.version
     // replace stuff in mcmod.info, nothing else
     filesMatching(['mcmod.info', 'pack.mcmeta']) { fcd ->
-        include 'mcmod.info'
         // replace version and mcversion
         fcd.expand (
                 'version': project.version,
