@@ -1,14 +1,13 @@
-import com.gtnewhorizons.retrofuturagradle.mcp.ReobfuscatedJar
 import org.jetbrains.gradle.ext.Gradle
 
 plugins {
-    id("java")
-    id("java-library")
-    id("maven-publish")
-    id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.7"
-    id("eclipse")
-    id("com.gtnewhorizons.retrofuturagradle") version "1.3.9"
-    id("com.matthewprenger.cursegradle") version "1.4.0"
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+    id 'org.jetbrains.gradle.plugin.idea-ext' version '1.1.7'
+    id 'eclipse'
+    id 'com.gtnewhorizons.retrofuturagradle' version '1.3.16'
+    id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
 
 version = project.mod_version
@@ -24,11 +23,11 @@ java {
     }
     // Generate sources and javadocs jars when building and publishing
     withSourcesJar()
-    withJavadocJar()
+    // withJavadocJar()
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.encoding = "UTF-8"
+    options.encoding = 'UTF-8'
 }
 
 configurations {
@@ -38,6 +37,18 @@ configurations {
 
 minecraft {
     mcVersion = '1.12.2'
+
+    // MCP Mappings
+    mcpMappingChannel = 'stable'
+    mcpMappingVersion = '39'
+    
+    // Set username here, the UUID will be looked up automatically
+    username = 'Developer'
+    
+    // Add any additional tweaker classes here
+    // extraTweakClasses.add('org.spongepowered.asm.launch.MixinTweaker')
+    
+    // Add various JVM arguments here for runtime
     def args = ["-ea:${project.group}"]
     if (project.use_coremod.toBoolean()) {
         args << '-Dfml.coreMods.load=' + coremod_plugin_class_name
@@ -49,26 +60,36 @@ minecraft {
     }
     extraRunJvmArguments.addAll(args)
 
+    // Include and use dependencies' Access Transformer files
     useDependencyAccessTransformers = true
-
-    injectedTags.put("VERSION", project.version)
+    
+    // Add any properties you want to swap out for a dynamic value at build time here
+    // Any properties here will be added to a class at build time, the name can be configured below
+    // Example:
+    // injectedTags.put('VERSION', project.version)
+    // injectedTags.put('MOD_ID', project.archives_base_name)
 }
 
-// Generate a my.project.Tags class with the version number as a field
+// Generate a group.archives_base_name.Tags class
 tasks.injectTags.configure {
-    outputClassName.set("${project.group}.Tags")
+    // Change Tags class' name here:
+    outputClassName.set("${project.group}.${project.archives_base_name}.Tags")
 }
 
 repositories {
     maven {
-        url = 'https://maven.cleanroommc.com'
+        name 'CleanroomMC Maven'
+        url 'https://maven.cleanroommc.com'
     }
-    maven { url = "https://repo.spongepowered.org/maven" }
-    //maven { url "https://maven.mcmoddev.com/" }
     maven {
-        url "https://cursemaven.com"
+        name 'SpongePowered Maven'
+        url 'https://repo.spongepowered.org/maven'
+    }
+    maven {
+        name 'CurseMaven'
+        url 'https://cursemaven.com'
         content {
-            includeGroup "curse.maven"
+            includeGroup 'curse.maven'
         }
     }
     mavenLocal() // Must be last for caching to work
@@ -76,47 +97,32 @@ repositories {
 
 dependencies {
     if (project.use_assetmover.toBoolean()) {
-        implementation 'com.cleanroommc:assetmover:2.0'
+        implementation 'com.cleanroommc:assetmover:2.5'
     }
     if (project.use_mixins.toBoolean()) {
-        implementation 'zone.rong:mixinbooter:7.0'
+        implementation 'zone.rong:mixinbooter:7.1'
     }
 
-    // Example deobf dependency
-    // compileOnly rfg.deobf("curse.maven:endercore-231868:2972849:")
+    // Example of deobfuscating a dependency
+    // implementation rfg.deobf('curse.maven:had-enough-items-557549:4543375')
 
     if (project.use_mixins.toBoolean()) {
-        api ("org.spongepowered:mixin:0.8.3") {transitive = false}
-        annotationProcessor('org.ow2.asm:asm-debug-all:5.2')
-        annotationProcessor('com.google.guava:guava:24.1.1-jre')
-        annotationProcessor('com.google.code.gson:gson:2.8.6')
-        annotationProcessor ("org.spongepowered:mixin:0.8.3") {transitive = false}
-    }
-
-}
-
-def mixinConfigRefMap = 'mixins.' + project.archives_base_name + '.refmap.json'
-def mixinTmpDir = buildDir.path + File.separator + 'tmp' + File.separator + 'mixins'
-def refMap = "${mixinTmpDir}" + File.separator + mixinConfigRefMap
-def mixinSrg = "${mixinTmpDir}" + File.separator + "mixins.srg"
-
-if (project.use_mixins.toBoolean()) {
-    tasks.named("reobfJar", ReobfuscatedJar).configure {
-        extraSrgFiles.from(mixinSrg)
-    }
-
-    tasks.named("compileJava", JavaCompile).configure {
-        doFirst {
-            new File(mixinTmpDir).mkdirs()
+        // Change your mixin refmap name here:
+        String mixin = modUtils.enableMixins('org.spongepowered:mixin:0.8.3', "mixins.${project.archives_base_name}.refmap.json")
+        api (mixin) {
+            transitive = false
         }
-        options.compilerArgs += [
-                "-AreobfSrgFile=${tasks.reobfJar.srg.get().asFile}",
-                "-AoutSrgFile=${mixinSrg}",
-                "-AoutRefMapFile=${refMap}",
-        ]
+        annotationProcessor 'org.ow2.asm:asm-debug-all:5.2'
+        annotationProcessor 'com.google.guava:guava:24.1.1-jre'
+        annotationProcessor 'com.google.code.gson:gson:2.8.6'
+        annotationProcessor (mixin) {
+            transitive = false
+        }
     }
+
 }
 
+// Adds Access Transformer files to tasks
 if (project.use_access_transformer.toBoolean()) {
     for (File at : sourceSets.getByName("main").resources.files) {
         if (at.name.toLowerCase().endsWith("_at.cfg")) {
@@ -127,12 +133,13 @@ if (project.use_access_transformer.toBoolean()) {
 }
 
 processResources {
-    // this will ensure that this task is redone when the versions change.
+    // This will ensure that this task is redone when the versions change
     inputs.property 'version', project.version
     inputs.property 'mcversion', project.minecraft.version
-    // replace stuff in mcmod.info, nothing else
+    
+    // Replace various properties in mcmod.info and pack.mcmeta if applicable
     filesMatching(['mcmod.info', 'pack.mcmeta']) { fcd ->
-        // replace version and mcversion
+        // Replace version and mcversion
         fcd.expand (
                 'version': project.version,
                 'mcversion': project.minecraft.version
@@ -140,13 +147,7 @@ processResources {
     }
     
     if (project.use_access_transformer.toBoolean()) {
-        rename '(.+_at.cfg)', 'META-INF/$1' // Access Transformers
-    }
-
-    if (project.use_mixins.toBoolean()) {
-        // Embed mixin refmap
-        from refMap
-        dependsOn("compileJava")
+        rename '(.+_at.cfg)', 'META-INF/$1' // Make sure Access Transformer files are in META-INF folder
     }
 }
 
@@ -160,7 +161,7 @@ jar {
                 attribute_map['ForceLoadAsMod'] = project.gradle.startParameter.taskNames[0] == "build"
             }
         }
-		if (project.use_access_transformer.toBoolean()) {
+        if (project.use_access_transformer.toBoolean()) {
             attribute_map['FMLAT'] = project.archives_base_name + '_at.cfg'
         }
         attributes(attribute_map)
@@ -170,31 +171,35 @@ jar {
 }
 
 idea {
-    module { inheritOutputDirs = true }
-    project { settings {
-        runConfigurations {
-            "1. Run Client"(Gradle) {
-                taskNames = ["runClient"]
+    module {
+        inheritOutputDirs = true
+    }
+    project {
+        settings {
+            runConfigurations {
+                "1. Run Client"(Gradle) {
+                    taskNames = ["runClient"]
+                }
+                "2. Run Server"(Gradle) {
+                    taskNames = ["runServer"]
+                }
+                "3. Run Obfuscated Client"(Gradle) {
+                    taskNames = ["runObfClient"]
+                }
+                "4. Run Obfuscated Server"(Gradle) {
+                    taskNames = ["runObfServer"]
+                }
             }
-            "2. Run Server"(Gradle) {
-                taskNames = ["runServer"]
-            }
-            "3. Run Obfuscated Client"(Gradle) {
-                taskNames = ["runObfClient"]
-            }
-            "4. Run Obfuscated Server"(Gradle) {
-                taskNames = ["runObfServer"]
+            compiler.javac {
+                afterEvaluate {
+                    javacAdditionalOptions = "-encoding utf8"
+                    moduleJavacAdditionalOptions = [
+                            (project.name + ".main"): tasks.compileJava.options.compilerArgs.collect { '"' + it + '"' }.join(' ')
+                    ]
+                }
             }
         }
-        compiler.javac {
-            afterEvaluate {
-                javacAdditionalOptions = "-encoding utf8"
-                moduleJavacAdditionalOptions = [
-                        (project.name + ".main"): tasks.compileJava.options.compilerArgs.collect { '"' + it + '"' }.join(' ')
-                ]
-            }
-        }
-    }}
+    }
 }
 
 tasks.named("processIdeaSettings").configure {
