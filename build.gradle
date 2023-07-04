@@ -92,12 +92,16 @@ minecraft {
     // Include and use dependencies' Access Transformer files
     useDependencyAccessTransformers = true
 
-    if (file('tags.properties').exists()) {
-        def props = new Properties()
-        file('tags.properties').withInputStream {
-            props.load(it)
+    if (project.use_tags.toBoolean()) {
+        if (file('tags.properties').exists()) {
+            def props = new Properties()
+            file('tags.properties').withInputStream {
+                props.load(it)
+            }
+            if (!props.isEmpty()) {
+                injectedTags.putAll(props)
+            }
         }
-        injectedTags.putAll(props)
     }
 }
 
