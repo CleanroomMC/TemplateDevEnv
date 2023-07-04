@@ -1,4 +1,5 @@
 // Master Switches
+boolean debugPublishing = false // If true, the tasks will run without the files being actually published
 boolean mavenPublishing = false // If true, configure the publishing in the publishing { } block
 boolean curseForgePublishing = false // If true, configure the publishing in the curseforge { } block
 boolean modrinthPublishing = false // If true, configure the publishing in the modrinth { } block
@@ -33,6 +34,7 @@ if (mavenPublishing) {
 
 // Documentation here: https://github.com/matthewprenger/CurseGradle/wiki/
 if (curseForgePublishing) {
+    apply plugin: 'com.matthewprenger.cursegradle'
     assertEnvironmentVariable 'CURSEFORGE_KEY'
     curseforge {
         apiKey System.getenv('CURSEFORGE_KEY')
@@ -50,12 +52,16 @@ if (curseForgePublishing) {
                     }
                 }
             }
+            options {
+                debug debugPublishing
+            }
         }
     }
 }
 
 // Documentation here: https://github.com/modrinth/minotaur
 if (modrinthPublishing) {
+    apply plugin: 'com.modrinth.minotaur'
     assertEnvironmentVariable 'MODRINTH_KEY'
     modrinth {
         token = System.getenv('MODRINTH_KEY')
@@ -63,7 +69,8 @@ if (modrinthPublishing) {
         versionNumber = project.mod_version
         versionType = releaseType
         uploadFile = tasks.reobfJar
-        gameVersions = ['1.12.2']
-        loaders = ['forge']
+        gameVersions ['1.12.2']
+        loaders ['forge']
+        debugMode = debugPublishing
     }
 }
