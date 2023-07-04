@@ -28,6 +28,7 @@ assertSubProperties 'use_mixins', 'mixin_booter_version', 'mixin_refmap'
 assertSubProperties 'is_coremod', 'coremod_includes_mod', 'coremod_plugin_class_name'
 assertSubProperties 'use_asset_mover', 'asset_mover_version'
 
+warnAndSetDefaultProperty 'use_modern_java_syntax', false
 warnAndSetDefaultProperty 'generate_sources_jar', false
 warnAndSetDefaultProperty 'generate_javadocs_jar', false
 warnAndSetDefaultProperty 'mapping_channel', 'stable'
@@ -41,9 +42,9 @@ archivesBaseName = project.mod_id
 // Set the toolchain version to decouple the Java we run Gradle with from the Java used to compile and run the mod
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
+        languageVersion.set(JavaLanguageVersion.of(project.use_modern_java_syntax.toBoolean() ? 16 : 8))
         // Azul covers the most platforms for Java 8 toolchains, crucially including MacOS arm64
-        vendor.set(org.gradle.jvm.toolchain.JvmVendorSpec.AZUL)
+        vendor.set(JvmVendorSpec.AZUL)
     }
     // Generate sources and javadocs jars when building and publishing
     if (project.generate_sources_jar.toBoolean()) {
@@ -56,6 +57,17 @@ java {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    if (project.use_modern_java_syntax.toBoolean()) {
+        if (it.name in ['compileMcLauncherJava', 'compilePatchedMcJava']) {
+            return
+        }
+        sourceCompatibility = 17
+        options.release.set(8)
+        javaCompiler.set(javaToolchains.compilerFor {
+            languageVersion.set(JavaLanguageVersion.of(16))
+            vendor.set(JvmVendorSpec.AZUL)
+        })
+    }
 }
 
 configurations {
@@ -113,10 +125,24 @@ repositories {
 }
 
 dependencies {
+    if (project.use_modern_java_syntax.toBoolean()) {
+        annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:1.0.0'
+        // Workaround for https://github.com/bsideup/jabel/issues/174
+        annotationProcessor 'net.java.dev.jna:jna-platform:5.13.0'
+        compileOnly ('com.github.bsideup.jabel:jabel-javac-plugin:1.0.0') {
+            transitive = false
+        }
+        // Allow jdk.unsupported classes like sun.misc.Unsafe, workaround for JDK-8206937 and fixes crashes in tests
+        patchedMinecraft 'me.eigenraven.java8unsupported:java-8-unsupported-shim:1.0.0'
+        // Include for tests
+        testAnnotationProcessor "com.github.bsideup.jabel:jabel-javac-plugin:1.0.0"
+        testCompileOnly("com.github.bsideup.jabel:jabel-javac-plugin:1.0.0") {
+            transitive = false // We only care about the 1 annotation class
+        }
+    }
     if (project.use_asset_mover.toBoolean()) {
         implementation "com.cleanroommc:assetmover:${project.asset_mover_version}"
     }
-
     if (project.use_mixins.toBoolean()) {
         // Change your mixin refmap name here:
         String mixin = modUtils.enableMixins("zone.rong:mixinbooter:${project.mixin_booter_version}", "" + project.mixin_refmap)
@@ -130,7 +156,6 @@ dependencies {
             transitive = false
         }
     }
-
 }
 
 apply from: 'dependencies.gradle'
@@ -227,6 +252,16 @@ idea {
             }
         }
     }
+}
+
+compileTestJava {
+    sourceCompatibility = targetCompatibility = 8
+}
+
+test {
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(8)
+    })
 }
 
 tasks.named('injectTags', InjectTagsTask).configure {
