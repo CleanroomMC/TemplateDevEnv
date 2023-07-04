@@ -1,0 +1,69 @@
+// Master Switches
+boolean mavenPublishing = false // If true, configure the publishing in the publishing { } block
+boolean curseForgePublishing = false // If true, configure the publishing in the curseforge { } block
+boolean modrinthPublishing = false // If true, configure the publishing in the modrinth { } block
+
+String releaseType = 'release' // Can be "alpha", "beta" or "release"
+
+if (mavenPublishing) {
+    assertProperty 'maven_repository_url'
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java // Publish with standard artifacts
+                groupId project.root_package // Publish with root package as maven group
+                artifactId project.mod_id // Publish artifacts with mod id as the artifact id
+
+                // Custom artifact:
+                // If you want to publish a different artifact to the one outputted when building normally
+                // Create a different gradle task (Jar task), in extra.gradle
+                // Remove the 'from components.java' line above
+                // Add this line (change the task name):
+                // artifacts task_name
+            }
+        }
+        repositories {
+            maven {
+                url project.maven_repository_url
+                credentials PasswordCredentials
+            }
+        }
+    }
+}
+
+// Documentation here: https://github.com/matthewprenger/CurseGradle/wiki/
+if (curseForgePublishing) {
+    assertEnvironmentVariable 'CURSEFORGE_KEY'
+    curseforge {
+        apiKey System.getenv('CURSEFORGE_KEY')
+        project {
+            id 'project-id' // Change to project id (can't be slug)
+            addGameVersion 'Java 8'
+            addGameVersion 'Forge'
+            addGameVersion '1.12.2'
+            setReleaseType releaseType
+            mainArtifact tasks.reobfJar, {
+                displayName "${project.mod_name} ${project.version}"
+                relations {
+                    if (project.use_mixins) {
+                        requiredDependency 'mixin-booter'
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Documentation here: https://github.com/modrinth/minotaur
+if (modrinthPublishing) {
+    assertEnvironmentVariable 'MODRINTH_KEY'
+    modrinth {
+        token = System.getenv('MODRINTH_KEY')
+        projectId = "project-slug" // This can be the project id or the slug.
+        versionNumber = project.mod_version
+        versionType = releaseType
+        uploadFile = tasks.reobfJar
+        gameVersions = ['1.12.2']
+        loaders = ['forge']
+    }
+}

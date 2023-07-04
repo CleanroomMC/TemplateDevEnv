@@ -1,0 +1,11 @@
+{
+  "package": "com.cleanroommc.example.mixins",
+  "required": true,
+  "refmap": "${refmap}",
+  "target": "@env(DEFAULT)",
+  "minVersion": "0.8.5",
+  "compatibilityLevel": "JAVA_8",
+  "server": [],
+  "client": [],
+  "mixins": []
+}
