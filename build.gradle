@@ -3,6 +3,7 @@
  */
 
 import com.gtnewhorizons.retrofuturagradle.mcp.InjectTagsTask
+import groovy.text.SimpleTemplateEngine
 import org.jetbrains.gradle.ext.Gradle
 
 plugins {
@@ -31,42 +32,29 @@ assertSubProperties 'use_asset_mover', 'asset_mover_version'
 warnAndSetDefaultProperty 'use_modern_java_syntax', false
 warnAndSetDefaultProperty 'generate_sources_jar', false
 warnAndSetDefaultProperty 'generate_javadocs_jar', false
+warnAndSetDefaultProperty 'generate_mcmod_info', false
+warnAndSetDefaultProperty 'generate_pack_mcmeta', false
 warnAndSetDefaultProperty 'mapping_channel', 'stable'
 warnAndSetDefaultProperty 'mapping_version', '39'
 warnAndSetDefaultProperty 'minecraft_username', 'Developer'
 
-version = project.mod_version
-group = project.root_package
-archivesBaseName = project.mod_id
+version = project.property('mod_version')
+group = project.property('root_package')
+archivesBaseName = project.property('mod_id')
 
 // Set the toolchain version to decouple the Java we run Gradle with from the Java used to compile and run the mod
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(project.use_modern_java_syntax.toBoolean() ? 16 : 8))
+        languageVersion.set(JavaLanguageVersion.of(project.property('use_modern_java_syntax').toBoolean() ? 16 : 8))
         // Azul covers the most platforms for Java 8 toolchains, crucially including MacOS arm64
         vendor.set(JvmVendorSpec.AZUL)
     }
     // Generate sources and javadocs jars when building and publishing
-    if (project.generate_sources_jar.toBoolean()) {
+    if (project.property('generate_sources_jar').toBoolean()) {
         withSourcesJar()
     }
-    if (project.generate_javadocs_jar.toBoolean()) {
+    if (project.property('generate_javadocs_jar').toBoolean()) {
         withJavadocJar()
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-    if (project.use_modern_java_syntax.toBoolean()) {
-        if (it.name in ['compileMcLauncherJava', 'compilePatchedMcJava']) {
-            return
-        }
-        sourceCompatibility = 17
-        options.release.set(8)
-        javaCompiler.set(javaToolchains.compilerFor {
-            languageVersion.set(JavaLanguageVersion.of(16))
-            vendor.set(JvmVendorSpec.AZUL)
-        })
     }
 }
 
@@ -79,21 +67,21 @@ minecraft {
     mcVersion = '1.12.2'
 
     // MCP Mappings
-    mcpMappingChannel = project.mapping_channel
-    mcpMappingVersion = project.mapping_version
+    mcpMappingChannel = project.property('mapping_channel')
+    mcpMappingVersion = project.property('mapping_version')
     
     // Set username here, the UUID will be looked up automatically
-    username = project.minecraft_username
+    username = project.property('minecraft_username')
     
     // Add any additional tweaker classes here
     // extraTweakClasses.add('org.spongepowered.asm.launch.MixinTweaker')
     
     // Add various JVM arguments here for runtime
     def args = ['-ea:' + project.group]
-    if (project.is_coremod.toBoolean()) {
+    if (project.property('is_coremod').toBoolean()) {
         args << '-Dfml.coreMods.load=' + project.coremod_plugin_class_name
     }
-    if (project.use_mixins.toBoolean()) {
+    if (project.property('use_mixins').toBoolean()) {
         args << '-Dmixin.hotSwap=true'
         args << '-Dmixin.checks.interfaces=true'
         args << '-Dmixin.debug.export=true'
@@ -104,7 +92,7 @@ minecraft {
     // Include and use dependencies' Access Transformer files
     useDependencyAccessTransformers = true
 
-    if (project.use_tags.toBoolean()) {
+    if (project.property('use_tags').toBoolean()) {
         if (file('tags.properties').exists()) {
             def props = new Properties()
             file('tags.properties').withInputStream {
@@ -125,7 +113,7 @@ repositories {
 }
 
 dependencies {
-    if (project.use_modern_java_syntax.toBoolean()) {
+    if (project.property('use_modern_java_syntax').toBoolean()) {
         annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:1.0.0'
         // Workaround for https://github.com/bsideup/jabel/issues/174
         annotationProcessor 'net.java.dev.jna:jna-platform:5.13.0'
@@ -140,12 +128,13 @@ dependencies {
             transitive = false // We only care about the 1 annotation class
         }
     }
-    if (project.use_asset_mover.toBoolean()) {
-        implementation "com.cleanroommc:assetmover:${project.asset_mover_version}"
+    if (project.property('use_asset_mover').toBoolean()) {
+        implementation "com.cleanroommc:assetmover:${interpolate(project.property('asset_mover_version'))}"
     }
-    if (project.use_mixins.toBoolean()) {
+    if (project.property('use_mixins').toBoolean()) {
         // Change your mixin refmap name here:
-        String mixin = modUtils.enableMixins("zone.rong:mixinbooter:${project.mixin_booter_version}", "" + project.mixin_refmap)
+        String mixin = modUtils.enableMixins("zone.rong:mixinbooter:${interpolate(project.property('mixin_booter_version'))}"
+                , "" + interpolate(project.property('mixin_refmap')))
         api (mixin) {
             transitive = false
         }
@@ -161,28 +150,26 @@ dependencies {
 apply from: 'dependencies.gradle'
 
 // Adds Access Transformer files to tasks
-if (project.use_access_transformer.toBoolean()) {
-    for (def location : project.access_transformer_locations.split(' ')) {
-        def fileLocation = file("${project.projectDir}/src/main/resources/${location}")
+if (project.property('use_access_transformer').toBoolean()) {
+    for (def location : interpolate(project.property('access_transformer_locations')).split(' ')) {
+        def fileLocation = file("${project.projectDir}/src/main/resources/$location")
         if (fileLocation.exists()) {
             tasks.deobfuscateMergedJarToSrg.accessTransformerFiles.from(at)
             tasks.srgifyBinpatchedJar.accessTransformerFiles.from(at)
         } else {
-            throw new GradleException("Access Transformer file [${fileLocation}] does not exist!")
+            throw new GradleException("Access Transformer file [$fileLocation] does not exist!")
         }
     }
 }
 
 processResources {
-    // This will ensure that this task is redone when the versions change
-    inputs.property 'version', project.version
-    inputs.property 'mcversion', project.minecraft.version
-    if (project.use_mixins.toBoolean()) {
-        inputs.property 'refmap', project.mixin_refmap
+    inputs.property 'version', project.property('version')
+    if (project.property('use_mixins').toBoolean()) {
+        inputs.property 'refmap', interpolate(project.property('mixin_refmap'))
     }
 
-    if (project.use_mixins.toBoolean()) {
-        include('mixins.*.json').exclude(project.mixin_refmap).expand('refmap': project.mixin_refmap)
+    if (project.property('use_mixins').toBoolean()) {
+        include('mixins.*.json').exclude(interpolate(project.property('mixin_refmap'))).expand('refmap': interpolate(project.property('mixin_refmap')))
     }
     
     // Replace various properties in mcmod.info and pack.mcmeta if applicable
@@ -190,11 +177,11 @@ processResources {
         // Replace version and mcversion
         fcd.expand (
                 'version': project.version,
-                'mcversion': project.minecraft.version
+                'mcversion': '1.12.2'
         )
     }
     
-    if (project.use_access_transformer.toBoolean()) {
+    if (project.property('use_access_transformer').toBoolean()) {
         rename '(.+_at.cfg)', 'META-INF/$1' // Make sure Access Transformer files are in META-INF folder
     }
 }
@@ -202,9 +189,9 @@ processResources {
 jar {
     manifest {
         def attribute_map = [:]
-        if (project.is_coremod.toBoolean()) {
-            attribute_map['FMLCorePlugin'] = project.coremod_plugin_class_name
-            if (project.include_mod.toBoolean()) {
+        if (project.property('is_coremod').toBoolean()) {
+            attribute_map['FMLCorePlugin'] = interpolate(project.property('coremod_plugin_class_name'))
+            if (project.property('coremod_includes_mod').toBoolean()) {
                 attribute_map['FMLCorePluginContainsFMLMod'] = true
                 def currentTasks = project.gradle.startParameter.taskNames
                 if (currentTasks[0] == 'build' || currentTasks[0] == 'prepareObfModsFolder' || currentTasks[0] == 'runObfClient') {
@@ -212,8 +199,8 @@ jar {
                 }
             }
         }
-        if (project.use_access_transformer.toBoolean()) {
-            attribute_map['FMLAT'] = project.access_transformer_locations
+        if (project.property('use_access_transformer').toBoolean()) {
+            attribute_map['FMLAT'] = interpolate(project.property('access_transformer_locations'))
         }
         attributes(attribute_map)
     }
@@ -264,21 +251,119 @@ test {
     })
 }
 
-tasks.named('injectTags', InjectTagsTask).configure {
-    it.outputClassName.set(provider {
-        return it.getTags().get().isEmpty() ? null : "${project.tag_class_name}"
-    })
+tasks.register('generateMcModInfo') {
+    group 'cleanroom helpers'
+    onlyIf {
+        def file = project.file("src/main/resources/mcmod.info")
+        if (file.exists()) {
+            project.logger.lifecycle('mcmod.info already exists. If you wish to generate it again, delete the existing file first.')
+            return false
+        }
+        return true
+    }
+    doLast {
+        def file = project.file("src/main/resources/mcmod.info")
+        file << """[{\n\t"modid": "${interpolate(project.property('mod_id'))}",\n\t"name": "${interpolate(project.property('mod_name'))}",\n\t"version": "${interpolate(project.property('mod_version'))}",\n\t"mcversion": "1.12.2\""""
+        if (project.property('mod_description')) {
+            file << """,\n\t"description": "${interpolate(project.property('mod_description'))}\""""
+        }
+        if (project.property('mod_authors')) {
+            def authors = interpolate(project.property('mod_authors')) as String
+            file << """,\n\t"authorList": [${authors.split(',').collect { """\"${it.trim()}\"""" }.join(', ')}]"""
+        }
+        if (project.property('mod_credits')) {
+            file << """,\n\t"credits": "${interpolate(project.property('mod_credits'))}\""""
+        }
+        if (project.property('mod_url')) {
+            file << """,\n\t"url": "${interpolate(project.property('mod_url'))}\""""
+        }
+        if (project.property('mod_update_json')) {
+            file << """,\n\t"updateJSON": "${interpolate(project.property('mod_update_json'))}\""""
+        }
+        if (project.property('mod_logo_path')) {
+            file << """,\n\t"logoFile": "${interpolate(project.property('mod_logo_path'))}\""""
+        }
+        file << '\n}]'
+    }
 }
 
-tasks.named('processIdeaSettings').configure {
-    it.dependsOn 'injectTags'
+tasks.register('generatePackMcMeta') {
+    group 'cleanroom helpers'
+    onlyIf {
+        def file = project.file("src/main/resources/pack.mcmeta")
+        if (file.exists()) {
+            project.logger.lifecycle('pack.mcmeta already exists. If you wish to generate it again, delete the existing file first.')
+            return false
+        }
+        return true
+    }
+    doLast {
+        def file = project.file("src/main/resources/pack.mcmeta")
+        file << """{\n\t"pack": {\n\t\t"description": "${interpolate(project.property('mod_name'))} Resources",\n\t\t"pack_format": 3\n\t}\n}"""
+    }
+}
+
+tasks.register('generateMixinJson') {
+    group 'cleanroom helpers'
+    onlyIf {
+        def file = project.file("src/main/resources/mixins.${interpolate(property('name'))}.json")
+        if (file.exists()) {
+            project.logger.lifecycle("mixins.${interpolate(property('name'))}.json already exists. If you wish to generate it again, delete the existing file first.")
+            return false
+        }
+        return true
+    }
+    doLast {
+        def file = project.file("src/main/resources/mixins.${interpolate(property('name'))}.json")
+        file << """{\n\t"package": "${interpolate(property('package'))}",\n\t"required": true,\n\t"refmap": "\${mixin_refmap}",\n\t"target": "@env(DEFAULT)",\n\t"minVersion": "0.8.5",\n\t"compatibilityLevel": "JAVA_8",\n\t"mixins": [],\n\t"server": [],\n\t"client": []\n}"""
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    if (project.use_modern_java_syntax.toBoolean()) {
+        if (it.name in ['compileMcLauncherJava', 'compilePatchedMcJava']) {
+            return
+        }
+        sourceCompatibility = 17
+        options.release.set(8)
+        javaCompiler.set(javaToolchains.compilerFor {
+            languageVersion.set(JavaLanguageVersion.of(16))
+            vendor.set(JvmVendorSpec.AZUL)
+        })
+    }
+}
+
+if (project.use_modern_java_syntax.toBoolean()) {
+    tasks.withType(Javadoc).configureEach {
+        sourceCompatibility = 17
+    }
+}
+
+tasks.named('injectTags', InjectTagsTask).configure {
+    onlyIf {
+        !it.getTags().get().isEmpty()
+    }
+    it.outputClassName.set(interpolate(project.property('tag_class_name')))
+}
+
+idea.project.settings {
+    taskTriggers {
+        if (property('generate_mcmod_info').toBoolean()) {
+            afterSync 'generateMcModInfo'
+        }
+        if (property('generate_pack_mcmeta').toBoolean()) {
+            afterSync 'generatePackMcMeta'
+        }
+        afterSync 'injectTags'
+    }
 }
 
 apply from: 'publishing.gradle'
 apply from: 'extra.gradle'
 
 void assertProperty(String propertyName) {
-    def property = project.findProperty propertyName
+    def property = project.findProperty(propertyName)
     if (property == null) {
         throw new GradleException("Property ${propertyName} is not defined!")
     }
@@ -297,26 +382,33 @@ void assertSubProperties(String propertyName, String... subPropertyNames) {
 }
 
 void warnAndSetDefaultProperty(String propertyName, defaultValue) {
-    def property = project.findProperty propertyName
+    def property = project.findProperty(propertyName)
     def exists = true
     if (property == null) {
         exists = false
-        project.logger.log LogLevel.WARN, "Property ${propertyName} is not defined!"
+        project.logger.log(LogLevel.WARN, "Property ${propertyName} is not defined!")
     } else if (property.isEmpty()) {
         exists = false
-        project.logger.log LogLevel.WARN, "Property ${propertyName} is empty!"
+        project.logger.log(LogLevel.WARN, "Property ${propertyName} is empty!")
     }
     if (!exists) {
-        project.setProperty propertyName, defaultValue.toString()
+        project.setProperty(propertyName, defaultValue.toString())
     }
 }
 
 void assertEnvironmentVariable(String propertyName) {
-    def property = System.getenv propertyName
+    def property = System.getenv(propertyName)
     if (property == null) {
-        throw new GradleException("System Environment Variable ${propertyName} is not defined!")
+        throw new GradleException("System Environment Variable $propertyName is not defined!")
     }
     if (property.isEmpty()) {
-        throw new GradleException("Property ${propertyName} is empty!")
+        throw new GradleException("Property $propertyName is empty!")
     }
+}
+
+String interpolate(value) {
+    if (value instanceof GString) {
+        return value
+    }
+    return new SimpleTemplateEngine().createTemplate(value).make(project.properties).toString()
 }
