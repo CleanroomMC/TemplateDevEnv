@@ -340,6 +340,10 @@ if (project.use_modern_java_syntax.toBoolean()) {
     }
 }
 
+tasks.named('runObfServer', JavaExec).configure {
+    mainClass = 'net.minecraftforge.fml.relauncher.ServerLaunchWrapper'
+}
+
 tasks.named('injectTags', InjectTagsTask).configure {
     onlyIf {
         !it.getTags().get().isEmpty()
