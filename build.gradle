@@ -10,8 +10,8 @@ plugins {
     id 'java'
     id 'java-library'
     id 'maven-publish'
+    id 'com.diffplug.spotless' version '6.19.0' apply false
     id 'org.jetbrains.gradle.plugin.idea-ext' version '1.1.7'
-    id 'eclipse'
     id 'com.gtnewhorizons.retrofuturagradle' version '1.3.19'
     id 'com.matthewprenger.cursegradle' version '1.4.0' apply false
     id 'com.modrinth.minotaur' version '2.+' apply false
@@ -30,6 +30,7 @@ assertSubProperties 'is_coremod', 'coremod_includes_mod', 'coremod_plugin_class_
 assertSubProperties 'use_asset_mover', 'asset_mover_version'
 
 warnAndSetDefaultProperty 'use_modern_java_syntax', false
+warnAndSetDefaultProperty 'spotless', false
 warnAndSetDefaultProperty 'generate_sources_jar', false
 warnAndSetDefaultProperty 'generate_javadocs_jar', false
 warnAndSetDefaultProperty 'generate_mcmod_info', false
@@ -37,6 +38,10 @@ warnAndSetDefaultProperty 'generate_pack_mcmeta', false
 warnAndSetDefaultProperty 'mapping_channel', 'stable'
 warnAndSetDefaultProperty 'mapping_version', '39'
 warnAndSetDefaultProperty 'minecraft_username', 'Developer'
+
+if (project.property('spotless')) {
+    apply plugin: 'com.diffplug.spotless'
+}
 
 version = project.property('mod_version')
 group = project.property('root_package')
@@ -61,6 +66,37 @@ java {
 configurations {
     embed
     implementation.extendsFrom(embed)
+}
+
+spotless {
+    encoding 'UTF-8'
+    format 'misc', {
+        target '.gitignore'
+
+        endWithNewline()
+        indentWithSpaces()
+        trimTrailingWhitespace()
+    }
+    java {
+        target 'src/main/java/**/*.java', 'src/test/java/**/*.java'
+
+        endWithNewline()
+        formatAnnotations()
+        importOrder()
+        indentWithSpaces()
+        removeUnusedImports()
+        toggleOffOn()
+        trimTrailingWhitespace()
+
+        if (project.property('cleanthat')) {
+            cleanthat().sourceCompatibility('1.8')
+        }
+    }
+    json {
+        target 'src/main/resources/**/*.json', 'src/test/resources/**/*.json'
+
+        simple().indentWithSpaces(6)
+    }
 }
 
 minecraft {
