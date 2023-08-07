@@ -38,6 +38,7 @@ warnAndSetDefaultProperty 'generate_pack_mcmeta', false
 warnAndSetDefaultProperty 'mapping_channel', 'stable'
 warnAndSetDefaultProperty 'mapping_version', '39'
 warnAndSetDefaultProperty 'minecraft_username', 'Developer'
+warnAndSetDefaultProperty 'change_minecraft_sources', false
 
 if (project.property('spotless')) {
     apply plugin: 'com.diffplug.spotless'
@@ -46,6 +47,8 @@ if (project.property('spotless')) {
 version = project.property('mod_version')
 group = project.property('root_package')
 archivesBaseName = project.property('mod_id')
+
+tasks.decompressDecompiledSources.enabled !project.property('change_minecraft_sources').toBoolean()
 
 // Set the toolchain version to decouple the Java we run Gradle with from the Java used to compile and run the mod
 java {
