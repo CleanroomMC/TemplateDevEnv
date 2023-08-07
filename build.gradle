@@ -202,7 +202,16 @@ if (project.property('use_access_transformer').toBoolean()) {
 }
 
 processResources {
-    inputs.property 'version', project.property('version')
+    inputs.property 'mod_id', project.property('mod_id')
+    inputs.property 'mod_name', project.property('mod_name')
+    inputs.property 'mod_version', project.property('mod_version')
+    inputs.property 'mod_description', project.property('mod_description')
+    inputs.property 'mod_authors', project.property('mod_authors')
+    inputs.property 'mod_credits', project.property('mod_credits')
+    inputs.property 'mod_url', project.property('mod_url')
+    inputs.property 'mod_update_json', project.property('mod_update_json')
+    inputs.property 'mod_logo_path', project.property('mod_logo_path')
+
     if (project.property('use_mixins').toBoolean()) {
         inputs.property 'refmap', interpolate(project.property('mixin_refmap'))
     }
@@ -212,11 +221,18 @@ processResources {
     }
     
     // Replace various properties in mcmod.info and pack.mcmeta if applicable
-    filesMatching(['mcmod.info', 'pack.mcmeta']) { fcd ->
-        // Replace version and mcversion
-        fcd.expand (
-                'version': project.version,
-                'mcversion': '1.12.2'
+    filesMatching(['mcmod.info', 'pack.mcmeta']) {
+        def authors = project.property('mod_authors') as String
+        expand (
+                'mod_id': project.property('mod_id'),
+                'mod_name': project.property('mod_name'),
+                'mod_version': project.property('mod_version'),
+                'mod_description': project.property('mod_description'),
+                'mod_authors': "[${authors.split(',').collect { """\"${it.trim()}\"""" }.join(', ')}]",
+                'mod_credits': project.property('mod_credits'),
+                'mod_url': project.property('mod_url'),
+                'mod_update_json': project.property('mod_update_json'),
+                'mod_logo_path': project.property('mod_logo_path')
         )
     }
     
@@ -288,58 +304,6 @@ test {
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(8)
     })
-}
-
-tasks.register('generateMcModInfo') {
-    group 'cleanroom helpers'
-    onlyIf {
-        def file = project.file("src/main/resources/mcmod.info")
-        if (file.exists()) {
-            project.logger.lifecycle('mcmod.info already exists. If you wish to generate it again, delete the existing file first.')
-            return false
-        }
-        return true
-    }
-    doLast {
-        def file = project.file("src/main/resources/mcmod.info")
-        file << """[{\n\t"modid": "${interpolate(project.property('mod_id'))}",\n\t"name": "${interpolate(project.property('mod_name'))}",\n\t"version": "${interpolate(project.property('mod_version'))}",\n\t"mcversion": "1.12.2\""""
-        if (project.property('mod_description')) {
-            file << """,\n\t"description": "${interpolate(project.property('mod_description'))}\""""
-        }
-        if (project.property('mod_authors')) {
-            def authors = interpolate(project.property('mod_authors')) as String
-            file << """,\n\t"authorList": [${authors.split(',').collect { """\"${it.trim()}\"""" }.join(', ')}]"""
-        }
-        if (project.property('mod_credits')) {
-            file << """,\n\t"credits": "${interpolate(project.property('mod_credits'))}\""""
-        }
-        if (project.property('mod_url')) {
-            file << """,\n\t"url": "${interpolate(project.property('mod_url'))}\""""
-        }
-        if (project.property('mod_update_json')) {
-            file << """,\n\t"updateJSON": "${interpolate(project.property('mod_update_json'))}\""""
-        }
-        if (project.property('mod_logo_path')) {
-            file << """,\n\t"logoFile": "${interpolate(project.property('mod_logo_path'))}\""""
-        }
-        file << '\n}]'
-    }
-}
-
-tasks.register('generatePackMcMeta') {
-    group 'cleanroom helpers'
-    onlyIf {
-        def file = project.file("src/main/resources/pack.mcmeta")
-        if (file.exists()) {
-            project.logger.lifecycle('pack.mcmeta already exists. If you wish to generate it again, delete the existing file first.')
-            return false
-        }
-        return true
-    }
-    doLast {
-        def file = project.file("src/main/resources/pack.mcmeta")
-        file << """{\n\t"pack": {\n\t\t"description": "${interpolate(project.property('mod_name'))} Resources",\n\t\t"pack_format": 3\n\t}\n}"""
-    }
 }
 
 tasks.register('generateMixinJson') {
