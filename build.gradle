@@ -138,7 +138,7 @@ minecraft {
                 props.load(it)
             }
             if (!props.isEmpty()) {
-                injectedTags.putAll(props)
+                injectedTags.putAll(props.collectEntries { k, v -> [(k): interpolate(v)] })
             }
         }
     }

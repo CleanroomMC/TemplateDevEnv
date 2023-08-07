@@ -1,15 +1,6 @@
 repositories {
     // Other repositories described by default:
     // CleanroomMC: https://maven.cleanroommc.com
-    /*
-    maven {
-        name 'CurseMaven'
-        url 'https://cursemaven.com'
-        content {
-            includeGroup 'curse.maven'
-        }
-    }
-     */
     exclusiveContent {
         forRepository {
             maven {

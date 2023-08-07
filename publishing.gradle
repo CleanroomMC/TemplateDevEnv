@@ -1,12 +1,13 @@
 // Master Switches
-boolean debugPublishing = false // If true, the tasks will run without the files being actually published
-boolean mavenPublishing = false // If true, configure the publishing in the publishing { } block
-boolean curseForgePublishing = false // If true, configure the publishing in the curseforge { } block
-boolean modrinthPublishing = false // If true, configure the publishing in the modrinth { } block
+boolean debug_publishing = false // If true, the tasks will run without the files being actually published
+boolean maven_publishing = false // If true, configure the publishing in the publishing { } block
+boolean curseforge_publishing = false // If true, configure the publishing in the curseforge { } block
+boolean modrinth_publishing = false // If true, configure the publishing in the modrinth { } block
 
-String releaseType = 'release' // Can be "alpha", "beta" or "release"
+String release_type = 'release' // Can be "alpha", "beta" or "release"
+String maven_repository_url = '' // URL pointing to your maven repository
 
-if (mavenPublishing) {
+if (maven_publishing) {
     assertProperty 'maven_repository_url'
     publishing {
         publications {
@@ -25,7 +26,7 @@ if (mavenPublishing) {
         }
         repositories {
             maven {
-                url project.maven_repository_url
+                url maven_repository_url
                 credentials PasswordCredentials
             }
         }
@@ -33,7 +34,7 @@ if (mavenPublishing) {
 }
 
 // Documentation here: https://github.com/matthewprenger/CurseGradle/wiki/
-if (curseForgePublishing) {
+if (curseforge_publishing) {
     apply plugin: 'com.matthewprenger.cursegradle'
     assertEnvironmentVariable 'CURSEFORGE_KEY'
     curseforge {
@@ -43,9 +44,9 @@ if (curseForgePublishing) {
             addGameVersion 'Java 8'
             addGameVersion 'Forge'
             addGameVersion '1.12.2'
-            setReleaseType releaseType
+            setReleaseType release_type
             mainArtifact tasks.reobfJar, {
-                displayName "${project.mod_name} ${project.version}"
+                displayName "${project.property('mod_name')} ${project.property('mod_version')}"
                 relations {
                     if (project.use_mixins) {
                         requiredDependency 'mixin-booter'
@@ -53,24 +54,24 @@ if (curseForgePublishing) {
                 }
             }
             options {
-                debug debugPublishing
+                debug debug_publishing
             }
         }
     }
 }
 
 // Documentation here: https://github.com/modrinth/minotaur
-if (modrinthPublishing) {
+if (modrinth_publishing) {
     apply plugin: 'com.modrinth.minotaur'
     assertEnvironmentVariable 'MODRINTH_KEY'
     modrinth {
         token = System.getenv('MODRINTH_KEY')
         projectId = "project-slug" // This can be the project id or the slug.
-        versionNumber = project.mod_version
-        versionType = releaseType
+        versionNumber = project.property('mod_version')
+        versionType = release_type
         uploadFile = tasks.reobfJar
         gameVersions ['1.12.2']
         loaders ['forge']
-        debugMode = debugPublishing
+        debugMode = debug_publishing
     }
 }
