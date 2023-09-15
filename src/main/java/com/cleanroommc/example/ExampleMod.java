@@ -12,7 +12,7 @@ public class ExampleMod {
     public static final Logger LOGGER = LogManager.getLogger(Tags.MOD_NAME);
 
     /**
-     * <a href="https://github.com/CleanroomMC/Encyclopedia/blob/master/mod_development/events/events.md#events">
+     * <a href="https://wiki.cleanroommc.com/mod-development/event/overview/">
      *     Take a look at how many FMLStateEvents you can listen to via the @Mod.EventHandler annotation here
      * </a>
      */
