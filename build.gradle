@@ -294,9 +294,10 @@ if (propertyBool('spotless')) {
 tasks.register('generateMixinJson') {
     group 'cleanroom helpers'
     onlyIf {
-        if (propertyBool('use_mixins') || propertyBool('generate_mixins_json')) {
+        if (propertyBool('use_mixins') && propertyBool('generate_mixins_json')) {
             return !file("src/main/resources/mixins.${propertyString('mod_id')}.json").exists()
         }
+        return false
     }
     doLast {
         def file = file("src/main/resources/mixins.${propertyString('mod_id')}.json")
