@@ -164,7 +164,7 @@ if (propertyBool('use_access_transformer')) {
 }
 
 processResources {
-    filesMatching(['mcmod.info', 'pack.mcmeta', 'mixins.*.json']) {
+    filesMatching(['mcmod.info', 'pack.mcmeta', 'mixins.*(?!refmap).*\\.json']) {
         def authors = propertyString('mod_authors').split(',').collect { """\"${ it.trim() }\"""" }.join(', ')
         expand(
                 'mod_id': propertyString('mod_id'),
