@@ -155,8 +155,8 @@ if (propertyBool('use_access_transformer')) {
     for (def location : propertyStringList('access_transformer_locations')) {
         def fileLocation = file("${projectDir}/src/main/resources/${location}")
         if (fileLocation.exists()) {
-            tasks.deobfuscateMergedJarToSrg.accessTransformerFiles.from(at)
-            tasks.srgifyBinpatchedJar.accessTransformerFiles.from(at)
+            tasks.deobfuscateMergedJarToSrg.accessTransformerFiles.from(fileLocation)
+            tasks.srgifyBinpatchedJar.accessTransformerFiles.from(fileLocation)
         } else {
             throw new GradleException("Access Transformer file [$fileLocation] does not exist!")
         }
