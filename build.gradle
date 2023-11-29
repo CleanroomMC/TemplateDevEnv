@@ -338,6 +338,21 @@ tasks.named('injectTags', InjectTagsTask).configure {
     it.outputClassName.set(propertyString('tag_class_name'))
 }
 
+tasks.named('prepareObfModsFolder').configure {
+    finalizedBy 'prioritizeCoremods'
+}
+
+tasks.register('prioritizeCoremods') {
+    dependsOn 'prepareObfModsFolder'
+    doLast {
+        fileTree('run/obfuscated').forEach {
+            if (it.isFile() && it.name =~ '(mixinbooter|configanytime)(-)([0-9])+\\.+([0-9])+(.jar)') {
+                it.renameTo(new File(it.parentFile, "!${it.name}"))
+            }
+        }
+    }
+}
+
 idea.project.settings {
     taskTriggers {
         afterSync 'cleanroomAfterSync'
