@@ -87,9 +87,6 @@ minecraft {
 
     // Add various JVM arguments here for runtime
     def args = ['-ea:' + group]
-    if (propertyBool('is_coremod')) {
-        args << '-Dfml.coreMods.load=' + propertyString('coremod_plugin_class_name')
-    }
     if (propertyBool('use_mixins')) {
         args << '-Dmixin.hotSwap=true'
         args << '-Dmixin.checks.interfaces=true'
