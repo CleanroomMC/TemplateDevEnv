@@ -161,14 +161,14 @@ if (propertyBool('use_access_transformer')) {
 }
 
 processResources {
-    filesMatching(['mcmod.info', 'pack.mcmeta', 'mixins.*(?!refmap).*\\.json']) {
-        def authors = propertyString('mod_authors').split(',').collect { """\"${ it.trim() }\"""" }.join(', ')
-        expand(
+    
+    filesNotMatching(propertyString('mixin_refmap') as String) { fcd ->
+        fcd.expand(
                 'mod_id': propertyString('mod_id'),
                 'mod_name': propertyString('mod_name'),
                 'mod_version': propertyString('mod_version'),
                 'mod_description': propertyString('mod_description'),
-                'mod_authors': "[${authors}]",
+                'mod_authors': "[${propertyStringList('mod_authors', ',').join(', ')}]",
                 'mod_credits': propertyString('mod_credits'),
                 'mod_url': propertyString('mod_url'),
                 'mod_update_json': propertyString('mod_update_json'),
