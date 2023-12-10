@@ -298,7 +298,7 @@ tasks.register('generateMixinJson') {
     }
     doLast {
         def file = file("src/main/resources/mixins.${propertyString('mod_id')}.json")
-        file << """{\n\t"package": "\${mixin_package}",\n\t"required": true,\n\t"refmap": "\${mixin_refmap}",\n\t"target": "@env(DEFAULT)",\n\t"minVersion": "0.8.5",\n\t"compatibilityLevel": "JAVA_8",\n\t"mixins": [],\n\t"server": [],\n\t"client": []\n}"""
+        file << """{\n\t"package": "${mixin_package}",\n\t"required": true,\n\t"refmap": "${mixin_refmap}",\n\t"target": "@env(DEFAULT)",\n\t"minVersion": "0.8.5",\n\t"compatibilityLevel": "JAVA_8",\n\t"mixins": [],\n\t"server": [],\n\t"client": []\n}"""
     }
 }
 
