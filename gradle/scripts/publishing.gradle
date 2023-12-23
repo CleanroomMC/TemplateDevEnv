@@ -35,7 +35,6 @@ if (propertyBool('publish_to_maven')) {
 // Documentation here: https://github.com/matthewprenger/CurseGradle/wiki/
 if (propertyBool('publish_to_curseforge')) {
     apply plugin: 'com.matthewprenger.cursegradle'
-    assertEnvironmentVariable('CURSEFORGE_TOKEN')
     assertProperty('curseforge_project_id')
     assertProperty('release_type')
     setDefaultProperty('curseforge_debug', false, false)
@@ -78,7 +77,6 @@ if (propertyBool('publish_to_curseforge')) {
 // Documentation here: https://github.com/modrinth/minotaur
 if (propertyBool('publish_to_modrinth')) {
     apply plugin: 'com.modrinth.minotaur'
-    assertEnvironmentVariable('MODRINTH_TOKEN')
     assertProperty('modrinth_project_id')
     assertProperty('release_type')
     setDefaultProperty('modrinth_debug', false, false)
