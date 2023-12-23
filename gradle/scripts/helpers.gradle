@@ -19,7 +19,7 @@ boolean propertyBool(String key) {
 }
 
 Collection<String> propertyStringList(String key) {
-    return propertyStringList(key, " ")
+    return propertyStringList(key, ' ')
 }
 
 Collection<String> propertyStringList(String key, String delimit) {
