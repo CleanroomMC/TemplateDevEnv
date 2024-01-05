@@ -251,7 +251,7 @@ test {
 
 changelog {
     header.set("[${propertyString('mod_version')}] - ${LocalDate.now().format("yyyy-MM-dd")}")
-    headerParserRegex.set(~/(\d+\.\d+)/)
+    if (propertyString('mod_version').split("\\.").length == 2) headerParserRegex.set(~/(\d+\.\d+)/)
 }
 
 String parserChangelog() {
