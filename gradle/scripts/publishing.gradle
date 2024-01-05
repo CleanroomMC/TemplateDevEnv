@@ -55,15 +55,15 @@ if (propertyBool('publish_to_curseforge')) {
                 }
             }
             mainArtifact tasks.reobfJar, {
-                displayName "${propertyString('mod_name')} ${propertyString('mod_version')}"
-                if (propertyBool('use_mixins') || propertyBool('use_asset_mover')) {
+                displayName = "${propertyString('mod_name')} ${propertyString('mod_version')}"
+                if (propertyBool('use_mixins')) {
                     relations {
-                        if (propertyBool('use_mixins')) {
-                            requiredDependency 'mixin-booter'
-                        }
-                        if (propertyBool('use_asset_mover')) {
-                            requiredDependency 'assetmover'
-                        }
+                        requiredDependency 'mixin-booter'
+                    }
+                }
+                if (propertyBool('use_asset_mover')) {
+                    relations {
+                        requiredDependency 'assetmover'
                     }
                 }
             }
@@ -86,8 +86,8 @@ if (propertyBool('publish_to_modrinth')) {
         versionNumber = propertyString('mod_version')
         versionType = propertyString('release_type')
         uploadFile = tasks.reobfJar
-        gameVersions ['1.12.2']
-        loaders ['forge']
+        gameVersions = ['1.12.2']
+        loaders = ['forge']
         debugMode = propertyBool('modrinth_debug')
         if (propertyBool('use_mixins') || propertyBool('use_asset_mover')) {
             dependencies {

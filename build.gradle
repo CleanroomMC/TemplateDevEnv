@@ -2,6 +2,7 @@
  * It is advised that you do not edit anything in the build.gradle; unless you are sure of what you are doing
  */
 import com.gtnewhorizons.retrofuturagradle.mcp.InjectTagsTask
+import org.jetbrains.changelog.Changelog
 import org.jetbrains.gradle.ext.Gradle
 
 import java.time.LocalDate
@@ -251,6 +252,23 @@ test {
 changelog {
     header.set("[${propertyString('mod_version')}] - ${LocalDate.now().format("yyyy-MM-dd")}")
     headerParserRegex.set(~/(\d+\.\d+)/)
+}
+
+tasks.register('changelogGetter', Exec) {
+    enabled !propertyBool('publish_with_changelog')
+    ext.result = {
+        if (!file('CHANGELOG.md').exists()) {
+            throw new GradleException('publish_with_changelog is true, but CHANGELOG.md does not exist in the workspace!')
+        }
+        String parsedChangelog =
+                changelog.renderItem(
+                        changelog.getLatest().withHeader(false).withEmptySections(false),
+                        Changelog.OutputType.MARKDOWN)
+        if (parsedChangelog.isEmpty()) {
+            throw new GradleException('publish_with_changelog is true, but the changelog for the latest version is empty!')
+        }
+        return parsedChangelog
+    }
 }
 
 if (propertyBool('spotless')) {
