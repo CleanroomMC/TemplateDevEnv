@@ -254,21 +254,18 @@ changelog {
     headerParserRegex.set(~/(\d+\.\d+)/)
 }
 
-tasks.register('changelogGetter', Exec) {
-    enabled !propertyBool('publish_with_changelog')
-    ext.result = {
-        if (!file('CHANGELOG.md').exists()) {
-            throw new GradleException('publish_with_changelog is true, but CHANGELOG.md does not exist in the workspace!')
-        }
-        String parsedChangelog =
-                changelog.renderItem(
-                        changelog.getLatest().withHeader(false).withEmptySections(false),
-                        Changelog.OutputType.MARKDOWN)
-        if (parsedChangelog.isEmpty()) {
-            throw new GradleException('publish_with_changelog is true, but the changelog for the latest version is empty!')
-        }
-        return parsedChangelog
+String parserChangelog() {
+    if (!file('CHANGELOG.md').exists()) {
+        throw new GradleException('publish_with_changelog is true, but CHANGELOG.md does not exist in the workspace!')
     }
+    String parsedChangelog =
+            changelog.renderItem(
+                    changelog.getLatest().withHeader(false).withEmptySections(false),
+                    Changelog.OutputType.MARKDOWN)
+    if (parsedChangelog.isEmpty()) {
+        throw new GradleException('publish_with_changelog is true, but the changelog for the latest version is empty!')
+    }
+    return parsedChangelog
 }
 
 if (propertyBool('spotless')) {

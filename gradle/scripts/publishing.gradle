@@ -47,9 +47,9 @@ if (propertyBool('publish_to_curseforge')) {
             addGameVersion 'Forge'
             addGameVersion '1.12.2'
             releaseType = propertyString('release_type')
-            if (tasks.changelogGetter.enabled) {
+            if (!propertyBool('publish_with_changelog')) {
+                changelog = parserChangelog()
                 changelogType = 'markdown'
-                changelog = tasks.changelogGetter.result()
             }
             mainArtifact tasks.reobfJar, {
                 displayName = "${propertyString('mod_name')} ${propertyString('mod_version')}"
@@ -96,8 +96,8 @@ if (propertyBool('publish_to_modrinth')) {
                 }
             }
         }
-        if (tasks.changelogGetter.enabled) {
-            changelog = tasks.changelogGetter.result()
+        if (!propertyBool('publish_with_changelog')) {
+            changelog = parserChangelog()
         }
         if (propertyBool('modrinth_sync_readme')) {
             syncBodyFrom = file('README.md').text
