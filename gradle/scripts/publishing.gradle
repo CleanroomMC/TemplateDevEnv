@@ -47,12 +47,9 @@ if (propertyBool('publish_to_curseforge')) {
             addGameVersion 'Forge'
             addGameVersion '1.12.2'
             releaseType = propertyString('release_type')
-            if (propertyBool('publish_with_changelog')) {
-                String parsedChangelog = parseChangelog()
-                if (parsedChangelog != null) {
-                    changelogType = 'markdown'
-                    changelog = parsedChangelog
-                }
+            if (tasks.changelogGetter.enabled) {
+                changelogType = 'markdown'
+                changelog = tasks.changelogGetter.result()
             }
             mainArtifact tasks.reobfJar, {
                 displayName = "${propertyString('mod_name')} ${propertyString('mod_version')}"
@@ -99,30 +96,12 @@ if (propertyBool('publish_to_modrinth')) {
                 }
             }
         }
-        if (propertyBool('publish_with_changelog')) {
-            String parsedChangelog = parseChangelog()
-            if (parsedChangelog != null) {
-                changelog = parsedChangelog
-            }
+        if (tasks.changelogGetter.enabled) {
+            changelog = tasks.changelogGetter.result()
         }
         if (propertyBool('modrinth_sync_readme')) {
             syncBodyFrom = file('README.md').text
             tasks.modrinth.dependsOn(tasks.modrinthSyncBody)
         }
     }
-}
-
-private String parseChangelog() {
-    if (propertyBool('publish_with_changelog')) {
-        if (!file('CHANGELOG.md').exists()) {
-            throw new GradleException('publish_with_changelog is true, but CHANGELOG.md does not exist in the workspace!')
-        }
-        String parsedChangelog = changelog.renderItem(changelog.getLatest().withHeader(false).withEmptySections(false),
-                org.jetbrains.changelog.Changelog.OutputType.MARKDOWN)
-        if (parsedChangelog.isEmpty()) {
-            throw new GradleException('publish_with_changelog is true, but the changelog for the latest version is empty!')
-        }
-        return parsedChangelog
-    }
-    return null
 }
