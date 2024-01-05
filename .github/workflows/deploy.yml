@@ -48,11 +48,15 @@ jobs:
       - name: Publish to CurseForge
         if: steps.properties.outputs.publish_to_curseforge == 'true'
         uses: gradle/gradle-build-action@v2
+        env:
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
         with:
           arguments: curseforge
 
       - name: Publish to Modrinth
         if: steps.properties.outputs.publish_to_modrinth == 'true'
         uses: gradle/gradle-build-action@v2
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
         with:
           arguments: modrinth
