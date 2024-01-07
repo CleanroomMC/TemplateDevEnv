@@ -39,7 +39,7 @@ if (propertyBool('publish_to_curseforge')) {
     assertProperty('release_type')
     setDefaultProperty('curseforge_debug', false, false)
     curseforge {
-        apiKey System.getenv('CURSEFORGE_TOKEN')
+        apiKey = System.getenv('CURSEFORGE_TOKEN') == null ? "" : System.getenv('CURSEFORGE_TOKEN')
         // noinspection GroovyAssignabilityCheck
         project {
             id = propertyString('curseforge_project_id')
@@ -47,23 +47,20 @@ if (propertyBool('publish_to_curseforge')) {
             addGameVersion 'Forge'
             addGameVersion '1.12.2'
             releaseType = propertyString('release_type')
-            if (propertyBool('publish_with_changelog')) {
-                String parsedChangelog = parseChangelog()
-                if (parsedChangelog != null) {
-                    changelogType = 'markdown'
-                    changelog = parsedChangelog
-                }
+            if (!propertyBool('publish_with_changelog')) {
+                changelog = parserChangelog()
+                changelogType = 'markdown'
             }
             mainArtifact tasks.reobfJar, {
-                displayName "${propertyString('mod_name')} ${propertyString('mod_version')}"
-                if (propertyBool('use_mixins') || propertyBool('use_asset_mover')) {
+                displayName = "${propertyString('mod_name')} ${propertyString('mod_version')}"
+                if (propertyBool('use_mixins')) {
                     relations {
-                        if (propertyBool('use_mixins')) {
-                            requiredDependency 'mixin-booter'
-                        }
-                        if (propertyBool('use_asset_mover')) {
-                            requiredDependency 'assetmover'
-                        }
+                        requiredDependency 'mixin-booter'
+                    }
+                }
+                if (propertyBool('use_asset_mover')) {
+                    relations {
+                        requiredDependency 'assetmover'
                     }
                 }
             }
@@ -81,13 +78,13 @@ if (propertyBool('publish_to_modrinth')) {
     assertProperty('release_type')
     setDefaultProperty('modrinth_debug', false, false)
     modrinth {
-        token = System.getenv('MODRINTH_TOKEN')
+        token = System.getenv('MODRINTH_TOKEN') ? "" : System.getenv('MODRINTH_TOKEN')
         projectId = propertyString('modrinth_project_id')
         versionNumber = propertyString('mod_version')
         versionType = propertyString('release_type')
         uploadFile = tasks.reobfJar
-        gameVersions ['1.12.2']
-        loaders ['forge']
+        gameVersions = ['1.12.2']
+        loaders = ['forge']
         debugMode = propertyBool('modrinth_debug')
         if (propertyBool('use_mixins') || propertyBool('use_asset_mover')) {
             dependencies {
@@ -99,30 +96,12 @@ if (propertyBool('publish_to_modrinth')) {
                 }
             }
         }
-        if (propertyBool('publish_with_changelog')) {
-            String parsedChangelog = parseChangelog()
-            if (parsedChangelog != null) {
-                changelog = parsedChangelog
-            }
+        if (!propertyBool('publish_with_changelog')) {
+            changelog = parserChangelog()
         }
         if (propertyBool('modrinth_sync_readme')) {
             syncBodyFrom = file('README.md').text
             tasks.modrinth.dependsOn(tasks.modrinthSyncBody)
         }
     }
-}
-
-private String parseChangelog() {
-    if (propertyBool('publish_with_changelog')) {
-        if (!file('CHANGELOG.md').exists()) {
-            throw new GradleException('publish_with_changelog is true, but CHANGELOG.md does not exist in the workspace!')
-        }
-        String parsedChangelog = changelog.renderItem(changelog.getLatest().withHeader(false).withEmptySections(false),
-                org.jetbrains.changelog.Changelog.OutputType.MARKDOWN)
-        if (parsedChangelog.isEmpty()) {
-            throw new GradleException('publish_with_changelog is true, but the changelog for the latest version is empty!')
-        }
-        return parsedChangelog
-    }
-    return null
 }

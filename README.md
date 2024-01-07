@@ -2,7 +2,7 @@
 
 Template workspace for modding Minecraft 1.12.2. Licensed under MIT, it is made for public use.
 
-This template currently utilizies **Gradle 8.1.1** + **[RetroFuturaGradle](https://github.com/GTNewHorizons/RetroFuturaGradle) 1.3.19** + **Forge 14.23.5.2860**.
+This template currently utilizies **Gradle 8.3** + **[RetroFuturaGradle](https://github.com/GTNewHorizons/RetroFuturaGradle) 1.3.26** + **Forge 14.23.5.2860**.
 
 With **coremod and mixin support** that is easy to configure.
 
