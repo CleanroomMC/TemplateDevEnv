@@ -249,17 +249,12 @@ test {
     })
 }
 
-changelog {
-    header.set("[${propertyString('mod_version')}] - ${LocalDate.now().format("yyyy-MM-dd")}")
-    if (propertyString('mod_version').split("\\.").length == 2) headerParserRegex.set(~/(\d+\.\d+)/)
-}
-
 String parserChangelog() {
     if (!file('CHANGELOG.md').exists()) {
         throw new GradleException('publish_with_changelog is true, but CHANGELOG.md does not exist in the workspace!')
     }
     String parsedChangelog = changelog.renderItem(
-            changelog.getLatest().withHeader(false).withEmptySections(false),
+            changelog.get(propertyString('mod_version')).withHeader(false).withEmptySections(false),
             Changelog.OutputType.MARKDOWN)
     if (parsedChangelog.isEmpty()) {
         throw new GradleException('publish_with_changelog is true, but the changelog for the latest version is empty!')
