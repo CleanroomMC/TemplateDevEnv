@@ -49,7 +49,7 @@ minecraft {
     // extraTweakClasses.add('org.spongepowered.asm.launch.MixinTweaker')
     
     // Add various JVM arguments here for runtime
-    def args = ["-ea:${project.group}"]
+    ArrayList<String> args = ["-ea:${project.group}"]
     if (project.use_coremod.toBoolean()) {
         args << '-Dfml.coreMods.load=' + coremod_plugin_class_name
     }
