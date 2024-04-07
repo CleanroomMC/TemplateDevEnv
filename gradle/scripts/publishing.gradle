@@ -1,0 +1,107 @@
+apply from: 'gradle/scripts/helpers.gradle'
+
+setDefaultProperty('publish_to_maven', true, false)
+setDefaultProperty('publish_to_curseforge', true, false)
+setDefaultProperty('publish_to_modrinth', true, false)
+
+if (propertyBool('publish_to_maven')) {
+    assertProperty('maven_name')
+    assertProperty('maven_url')
+    publishing {
+        repositories {
+            maven {
+                name propertyString('maven_name').replaceAll("\\s", "")
+                url propertyString('maven_url')
+                credentials(PasswordCredentials)
+            }
+        }
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java // Publish with standard artifacts
+                setGroupId(propertyString('root_package'))// Publish with root package as maven group
+                setArtifactId(propertyString('mod_id')) // Publish artifacts with mod id as the artifact id
+
+                // Custom artifact:
+                // If you want to publish a different artifact to the one outputted when building normally
+                // Create a different gradle task (Jar task), in extra.gradle
+                // Remove the 'from components.java' line above
+                // Add this line (change the task name):
+                // artifacts task_name
+            }
+        }
+    }
+}
+
+// Documentation here: https://github.com/matthewprenger/CurseGradle/wiki/
+if (propertyBool('publish_to_curseforge')) {
+    apply plugin: 'com.matthewprenger.cursegradle'
+    assertProperty('curseforge_project_id')
+    assertProperty('release_type')
+    setDefaultProperty('curseforge_debug', false, false)
+    curseforge {
+        apiKey = System.getenv('CURSEFORGE_TOKEN') == null ? "" : System.getenv('CURSEFORGE_TOKEN')
+        // noinspection GroovyAssignabilityCheck
+        project {
+            id = propertyString('curseforge_project_id')
+            addGameVersion 'Java 8'
+            addGameVersion 'Forge'
+            addGameVersion '1.12.2'
+            releaseType = propertyString('release_type')
+            if (!propertyBool('publish_with_changelog')) {
+                changelog = parserChangelog()
+                changelogType = 'markdown'
+            }
+            mainArtifact tasks.reobfJar, {
+                displayName = "${propertyString('mod_name')} ${propertyString('mod_version')}"
+                if (propertyBool('use_mixins')) {
+                    relations {
+                        requiredDependency 'mixin-booter'
+                    }
+                }
+                if (propertyBool('use_asset_mover')) {
+                    relations {
+                        requiredDependency 'assetmover'
+                    }
+                }
+            }
+            options {
+                debug = propertyBool('curseforge_debug')
+            }
+        }
+    }
+}
+
+// Documentation here: https://github.com/modrinth/minotaur
+if (propertyBool('publish_to_modrinth')) {
+    apply plugin: 'com.modrinth.minotaur'
+    assertProperty('modrinth_project_id')
+    assertProperty('release_type')
+    setDefaultProperty('modrinth_debug', false, false)
+    modrinth {
+        token = System.getenv('MODRINTH_TOKEN') ? "" : System.getenv('MODRINTH_TOKEN')
+        projectId = propertyString('modrinth_project_id')
+        versionNumber = propertyString('mod_version')
+        versionType = propertyString('release_type')
+        uploadFile = tasks.reobfJar
+        gameVersions = ['1.12.2']
+        loaders = ['forge']
+        debugMode = propertyBool('modrinth_debug')
+        if (propertyBool('use_mixins') || propertyBool('use_asset_mover')) {
+            dependencies {
+                if (propertyBool('use_mixins')) {
+                    required.project 'mixinbooter'
+                }
+                if (propertyBool('use_asset_mover')) {
+                    required.project 'assetmover'
+                }
+            }
+        }
+        if (!propertyBool('publish_with_changelog')) {
+            changelog = parserChangelog()
+        }
+        if (propertyBool('modrinth_sync_readme')) {
+            syncBodyFrom = file('README.md').text
+            tasks.modrinth.dependsOn(tasks.modrinthSyncBody)
+        }
+    }
+}
