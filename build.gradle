@@ -247,9 +247,15 @@ compileTestJava {
 }
 
 test {
+    useJUnitPlatform()
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(8)
     })
+    if (propertyBool('show_testing_output')) {
+        testLogging {
+            showStandardStreams = true
+        }
+    }
 }
 
 String parserChangelog() {
