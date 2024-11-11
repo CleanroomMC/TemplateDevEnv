@@ -172,7 +172,7 @@ processResources {
                 'mod_name': propertyString('mod_name'),
                 'mod_version': propertyString('mod_version'),
                 'mod_description': propertyString('mod_description'),
-                'mod_authors': "[${propertyStringList('mod_authors', ',').join(', ')}]",
+                'mod_authors': "${propertyStringList('mod_authors', ',').join(', ')}",
                 'mod_credits': propertyString('mod_credits'),
                 'mod_url': propertyString('mod_url'),
                 'mod_update_json': propertyString('mod_update_json'),

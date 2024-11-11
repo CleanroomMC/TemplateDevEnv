@@ -4,7 +4,7 @@
 	"version": "${mod_version}",
 	"mcversion": "1.12.2",
 	"description": "${mod_description}",
-	"authorList": ${mod_authors},
+	"authorList": ["${mod_authors}"],
 	"credits": "${mod_credits}",
 	"url": "${mod_url}",
 	"updateJSON": "${mod_update_json}",
