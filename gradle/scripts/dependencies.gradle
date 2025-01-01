@@ -54,6 +54,7 @@ dependencies {
     // runtimeOnly = runtime dependency
     // compileOnly = compile time dependency
     // annotationProcessor = annotation processing dependencies
+    // embed = bundle dependencies into final output artifact (no relocation)
 
     // Transitive dependencies:
     // (Dependencies that your dependency depends on)
