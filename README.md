@@ -1,8 +1,9 @@
 ## TemplateDevEnv
+_For Kotlin see [TemplateDevEnvKt](https://github.com/CleanroomMC/TemplateDevEnvKt)_
 
 Template workspace for modding Minecraft 1.12.2. Licensed under MIT, it is made for public use.
 
-This template runs on Java 21! Currently utilizies **Gradle 8.10.1** + **[RetroFuturaGradle](https://github.com/GTNewHorizons/RetroFuturaGradle) 1.4.1** + **Forge 14.23.5.2847**.
+This template runs on Java 21! Currently utilizies **Gradle 8.12** + **[RetroFuturaGradle](https://github.com/GTNewHorizons/RetroFuturaGradle) 1.4.1** + **Forge 14.23.5.2847**.
 
 With **coremod and mixin support** that is easy to configure.
 
