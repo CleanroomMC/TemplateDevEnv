@@ -1,0 +1,35 @@
+name: Build
+
+on:
+  push
+
+jobs:
+  build:
+    if: github.repository != 'CleanroomMC/TemplateDevEnv'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          build-scan-publish: true
+          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
+          build-scan-terms-of-use-agree: "yes" 
+
+      - name: Build with Gradle
+        run: ./gradlew --build-cache --info --stacktrace build
+      
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: build/libs/
+          if-no-files-found: error
+          compression-level: 1
